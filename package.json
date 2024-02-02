@@ -1,6 +1,15 @@
 {
+  "scripts": {
+    "build": "tsc --build",
+    "start": "node ./dist/fusbitcli.js"
+  },
   "dependencies": {
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz",
     "xlsx-populate": "^1.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.16",
+    "typescript": "^5.3.3"
   }
 }
