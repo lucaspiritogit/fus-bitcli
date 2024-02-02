@@ -93,7 +93,6 @@ async function createExcel(
         }
         const lastRow = sh.usedRange().endCell().rowNumber();
 
-
         const commonHexForCols = "8dde87";
 
         // Total de horas
@@ -101,7 +100,6 @@ async function createExcel(
         sh.column(`G`).width(15);
         sh.cell("G1").style("horizontalAlignment", "center");
         sh.cell("G1").style("fill", "d3db74");
-
 
         // Total de horas formula
         sh.cell(`G2`).formula(`SUM(E2:E${lastRow})`);
@@ -156,17 +154,39 @@ async function createExcel(
 }
 
 async function main() {
-  const responsablesCount: number = await ask<number>(
+  let responsablesCount: number = await ask<number>(
     "Numero de responsables: "
   );
 
-  const responsables: Array<string> = [];
+  while(!responsablesCount || isNaN(responsablesCount)) {
+    if(isNaN(responsablesCount)) {
+      console.log("No se acepta texto como parametro")
+    }
+    responsablesCount = await ask<number>(
+      "Numero de responsables: "
+    );
+  }
+
+  let responsables: Array<string> = [];
   for (let i = 0; i < responsablesCount; i++) {
     const name: string = await ask<string>(
       `Nombre de responsable numero ${i + 1}: `
     );
     responsables.push(name);
   }
+
+  
+
+
+  if(responsables.length == 0) {
+    for (let i = 0; i < responsablesCount; i++) {
+      const name: string = await ask<string>(
+        `Nombre de responsable numero ${i + 1}: `
+      );
+      responsables.push(name);
+    }
+  }
+
 
   const project: string = await ask<string>("Proyecto: ");
 
