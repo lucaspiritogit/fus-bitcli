@@ -46,7 +46,8 @@ async function createExcel(
       }
       j = 1;
     }
-
+    const range = `D2:D${responsablesCount * new Date(year, month, 0).getDate() + 1}`;
+    excelCols.push(['Total de horas:', '', "", `=SUM(${range})`, '']);
     excelSheet = XLSX.utils.aoa_to_sheet(excelCols);
 
     const date = new Date(year, month - 1);
@@ -66,27 +67,23 @@ async function createExcel(
 
   XlsxPopulate.fromFileAsync(`./${excelFileName}`)
     .then((workbook: any) => {
-       workbook.sheets().map((sh:any) => {
+      workbook.sheets().map((sh: any) => {
 
-         console.log("🚀 ~ workbook.sheets ~ sh:", sh.name())
+        for (let row = 2; ; row++) {
+          const cell = sh.cell(`A${row}`);
+          const dateValue = cell.value();
+          if (!dateValue) break;
 
-          for (let row = 2; ; row++) {
-            const cell = sh.cell(`A${row}`);
-            const dateValue = cell.value();
-            if (!dateValue) break;
-
-            const currentDate = new Date(dateValue);
-            const isWeekend =
+          const currentDate = new Date(dateValue);
+          const isWeekend =
             currentDate.getDay() === 0 || currentDate.getDay() === 6;
 
-            if (isWeekend) {
-              const weekendCell = sh.cell(`A${row}`);
-              weekendCell.style({ fill: "6840d6" });
-            }
+          if (isWeekend) {
+            const weekendCell = sh.cell(`A${row}`);
+            weekendCell.style({ fill: "6840d6" });
           }
-
         }
-        );
+      });
       return workbook.toFileAsync(`./${excelFileName}`);
     })
     .then(() => {
@@ -99,15 +96,19 @@ async function createExcel(
 }
 
 async function main() {
-  const responsablesCount: number = await questionAsync<number>('Numero de participantes: ');
+  const responsablesCount: number = await questionAsync<number>(
+    "Numero de responsables: "
+  );
 
   const responsables: Array<string> = [];
   for (let i = 0; i < responsablesCount; i++) {
-    const name: string = await questionAsync<string>(`Nombre de participante numero ${i + 1}: `);
+    const name: string = await questionAsync<string>(
+      `Nombre de responsable numero ${i + 1}: `
+    );
     responsables.push(name);
   }
 
-  const project:string = await questionAsync<string>('Proyecto: ');
+  const project: string = await questionAsync<string>("Proyecto: ");
 
   await createExcel(responsablesCount, responsables, project);
 }

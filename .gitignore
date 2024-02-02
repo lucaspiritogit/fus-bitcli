@@ -2,3 +2,4 @@
 .vscode
 *.xlsx
 dist
+.*~lock
