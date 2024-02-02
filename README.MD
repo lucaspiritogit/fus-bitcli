@@ -4,7 +4,6 @@ Herramienta CLI para generar bitacoras diarias para Fusap
 
 ![Mockupimage](./assets/mockup.png "mockup")
 
-
 # Como utilizar
 
 ## Pre-requisitos
