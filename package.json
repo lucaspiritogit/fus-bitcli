@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz",
+    "xlsx-populate": "^1.21.0"
+  }
+}
