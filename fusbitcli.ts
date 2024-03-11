@@ -1,7 +1,11 @@
+import { Sheet } from "xlsx";
+
 const readline = require("readline");
 const XLSX = require("xlsx");
 const XlsxPopulate = require("xlsx-populate");
 const config = require('./config.json')
+
+const STARTING_ROW = 3
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -28,26 +32,30 @@ async function createExcel(
   for (let month = 1; month <= 12; month++) {
     const excelCols = [
       [
+        "AÑO/MES", "", "", "TOTAL DE HORAS", "", "", "",
+      ],
+      [
         "Fecha",
         "Responsable",
         "Proyecto",
         "Incidente/Tarea",
         "Horas",
         "Descripcion",
-        "Año/Mes"
       ],
     ];
+    // aoa es array of arrays
     let excelSheet = XLSX.utils.aoa_to_sheet([]);
     let j = 1;
     for (let i = 0; i < responsablesCount; i++) {
       const daysInMonth = new Date(year, month, 0).getDate();
       for (; j <= daysInMonth; j++) {
+        // O(n^3)
+        // TODO optimizar esto para que ande en una tostadora
         const currentDate = new Date(year, month - 1, j);
 
         const rowData = [
           currentDate.toLocaleDateString("en-EN"),
           responsables[i],
-          "",
           "",
           "",
           "",
@@ -76,8 +84,8 @@ async function createExcel(
   XlsxPopulate.fromFileAsync(`./${excelFileName}`)
     .then((workbook: any) => {
       console.log("Populando las columnas del excel con fechas y nombres...")
-      workbook.sheets().map((sh: any) => {
-        for (let row = 2; ; row++) {
+      workbook.sheets().map((sh: Sheet) => {
+        for (let row = STARTING_ROW; ; row++) {
           const cell = sh.cell(`A${row}`);
           sh.row(row).height(15);
           sh.row(row).style("fontFamily", config.font.defaultFont)
@@ -117,56 +125,38 @@ async function createExcel(
 function applyStylesAndFormulasToRows(sh: any, lastRow: any, mainColumnsColor: any) {
   sh.row(1).style("fontFamily", config.font.defaultFont);
   sh.row(1).style("bold", true);
+  sh.row(2).style("fontFamily", config.font.defaultFont);
+  sh.row(2).style("bold", true);
+  sh.row(1).height(20);
 
-  // Año/Mes
-  sh.cell(`H1`).value("Año/Mes");
-  sh.cell("H1").style("horizontalAlignment", "center");
-  sh.cell("H1").style("fill", config.colors.anioMesColumnColor);
-
-  sh.cell(`H2`).value(`${year + " " + sh.name()}`);
-  sh.cell("H2").style("horizontalAlignment", "center");
-  sh.column(`H`).width(20);
-
-  // Total de horas
-  sh.cell(`G1`).value("Total de horas");
-  sh.column(`G`).width(15);
-  sh.cell("G1").style("horizontalAlignment", "center");
-  sh.cell("G1").style("fill", config.colors.totalHorasColumnColor);
-
-  // Total de horas formula
-  sh.cell(`G2`).formula(`SUM(E2:E${lastRow})`);
-  sh.cell("G2").style("horizontalAlignment", "center");
-
-  // Fecha
-  sh.cell("A1").style("fill", mainColumnsColor);
-  sh.column("A").width(15);
+  sh.cell("A2").style("fill", mainColumnsColor);
   sh.column("A").style("horizontalAlignment", "center");
   sh.column("A").style("border", true);
+  sh.column("A").width(15);
 
-  // Responsable
-  sh.cell("B1").style("fill", mainColumnsColor);
-  sh.column("B").width(15);
+  sh.cell(`B1`).value(`${year + " " + sh.name()}`);
+  sh.cell("B1").style("horizontalAlignment", "center");
+  sh.cell("B2").style("fill", mainColumnsColor);
   sh.column("B").style("border", true);
+  sh.column(`B`).width(25);
 
-  // Proyecto
-  sh.cell("C1").style("fill", mainColumnsColor);
-  sh.column("C").width(15);
+  sh.cell("C2").style("fill", mainColumnsColor);
   sh.column("C").style("border", true);
+  sh.column("C").width(15);
 
-  // Incidente/Tarea
-  sh.cell("D1").style("fill", mainColumnsColor);
-  sh.column("D").width(40);
+  sh.cell("D2").style("fill", mainColumnsColor);
   sh.column("D").style("border", true);
+  sh.column("D").width(40);
 
-  // Horas
-  sh.cell("E1").style("fill", mainColumnsColor);
-  sh.column("E").width(15);
+  sh.cell(`E1`).formula(`SUM(E3:E${lastRow})`);
+  sh.cell("E1").style("horizontalAlignment", "center");
+  sh.cell("E2").style("fill", mainColumnsColor);
   sh.column("E").style("border", true);
+  sh.column("E").width(15);
 
-  // Descripcion
-  sh.cell("F1").style("fill", mainColumnsColor);
-  sh.column("F").width(15);
+  sh.cell("F2").style("fill", mainColumnsColor);
   sh.column("F").style("border", true);
+  sh.column("F").width(15);
 }
 
 async function main() {
