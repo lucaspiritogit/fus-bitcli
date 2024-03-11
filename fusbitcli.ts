@@ -35,12 +35,7 @@ async function createExcel(
         "AÑO/MES", "", "", "TOTAL DE HORAS", "", "", "",
       ],
       [
-        "Fecha",
-        "Responsable",
-        "Proyecto",
-        "Incidente/Tarea",
-        "Horas",
-        "Descripcion",
+        "Fecha", "Responsable", "Proyecto", "Incidente/Tarea", "Horas", "Descripcion",
       ],
     ];
     // aoa es array of arrays
