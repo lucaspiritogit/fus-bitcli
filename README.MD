@@ -25,6 +25,6 @@ En el proyecto hay un archivo `config.json` que tiene los valores hexadecimales 
 
 ## Ejecucion
 
-1. Dentro de la carpeta del proyecto ejecutar: `npm run start:tsx`
+1. Dentro de la carpeta del proyecto ejecutar: `npm run bit`
 
 
