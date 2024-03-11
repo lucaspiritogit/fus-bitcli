@@ -34,6 +34,7 @@ async function createExcel(
         "Incidente/Tarea",
         "Horas",
         "Descripcion",
+        "Año/Mes"
       ],
     ];
     let excelSheet = XLSX.utils.aoa_to_sheet([]);
@@ -79,7 +80,9 @@ async function createExcel(
         for (let row = 2; ; row++) {
           const cell = sh.cell(`A${row}`);
           sh.row(row).height(15);
+          sh.row(row).style("fontFamily", config.font.defaultFont)
           let dateValue = cell.value();
+          // La condicion para cortar el loop es si ya no hay fecha que completar por integrante.
           if (!dateValue) break;
 
           const currentDate = new Date(dateValue);
@@ -96,6 +99,20 @@ async function createExcel(
         const lastRow = sh.usedRange().endCell().rowNumber();
 
         const mainColumnsColor = config.colors.mainColumnsColor;
+
+        sh.row(1).style("fontFamily", config.font.defaultFont)
+
+        // Año/Mes
+        sh.cell(`H1`).value("Año/Mes");
+        sh.column(`H`).width(15);
+        sh.cell("H1").style("horizontalAlignment", "center");
+        sh.cell("H1").style("bold", true);
+        sh.cell("H1").style("fill", config.colors.anioMesColumnColor);
+
+        sh.cell(`H2`).value(`${year + " " + sh.name()}`);
+        sh.column(`H`).width(15);
+        sh.cell("H2").style("horizontalAlignment", "center");
+        sh.cell("H2").style("bold", true);
 
         // Total de horas
         sh.cell(`G1`).value("Total de horas:");
@@ -129,7 +146,7 @@ async function createExcel(
         // Incidente/Tarea
         sh.cell("D1").style("bold", true);
         sh.cell("D1").style("fill", mainColumnsColor);
-        sh.column("D").width(100);
+        sh.column("D").width(40);
         sh.column("D").style("border", true);
 
         // Horas
