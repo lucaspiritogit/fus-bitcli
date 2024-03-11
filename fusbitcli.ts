@@ -100,66 +100,7 @@ async function createExcel(
 
         const mainColumnsColor = config.colors.mainColumnsColor;
 
-        sh.row(1).style("fontFamily", config.font.defaultFont)
-
-        // Año/Mes
-        sh.cell(`H1`).value("Año/Mes");
-        sh.column(`H`).width(15);
-        sh.cell("H1").style("horizontalAlignment", "center");
-        sh.cell("H1").style("bold", true);
-        sh.cell("H1").style("fill", config.colors.anioMesColumnColor);
-
-        sh.cell(`H2`).value(`${year + " " + sh.name()}`);
-        sh.column(`H`).width(15);
-        sh.cell("H2").style("horizontalAlignment", "center");
-        sh.cell("H2").style("bold", true);
-
-        // Total de horas
-        sh.cell(`G1`).value("Total de horas:");
-        sh.column(`G`).width(15);
-        sh.cell("G1").style("horizontalAlignment", "center");
-        sh.cell("G1").style("fill", config.colors.totalHorasColumnColor);
-
-        // Total de horas formula
-        sh.cell(`G2`).formula(`SUM(E2:E${lastRow})`);
-        sh.cell("G2").style("horizontalAlignment", "center");
-
-        // Fecha
-        sh.cell("A1").style("bold", true);
-        sh.cell("A1").style("fill", mainColumnsColor);
-        sh.column("A").width(15);
-        sh.column("A").style("horizontalAlignment", "center");
-        sh.column("A").style("border", true);
-
-        // Responsable
-        sh.cell("B1").style("bold", true);
-        sh.cell("B1").style("fill", mainColumnsColor);
-        sh.column("B").width(15);
-        sh.column("B").style("border", true);
-
-        // Proyecto
-        sh.cell("C1").style("bold", true);
-        sh.cell("C1").style("fill", mainColumnsColor);
-        sh.column("C").width(15);
-        sh.column("C").style("border", true);
-
-        // Incidente/Tarea
-        sh.cell("D1").style("bold", true);
-        sh.cell("D1").style("fill", mainColumnsColor);
-        sh.column("D").width(40);
-        sh.column("D").style("border", true);
-
-        // Horas
-        sh.cell("E1").style("bold", true);
-        sh.cell("E1").style("fill", mainColumnsColor);
-        sh.column("E").width(15);
-        sh.column("E").style("border", true);
-
-        // Descripcion
-        sh.cell("F1").style("bold", true);
-        sh.cell("F1").style("fill", mainColumnsColor);
-        sh.column("F").width(15);
-        sh.column("F").style("border", true);
+        applyStylesAndFormulasToRows(sh, lastRow, mainColumnsColor);
       });
       return workbook.toFileAsync(`./${excelFileName}`);
     })
@@ -171,6 +112,61 @@ async function createExcel(
       console.error("Error:", error);
       rl.close();
     });
+}
+
+function applyStylesAndFormulasToRows(sh: any, lastRow: any, mainColumnsColor: any) {
+  sh.row(1).style("fontFamily", config.font.defaultFont);
+  sh.row(1).style("bold", true);
+
+  // Año/Mes
+  sh.cell(`H1`).value("Año/Mes");
+  sh.cell("H1").style("horizontalAlignment", "center");
+  sh.cell("H1").style("fill", config.colors.anioMesColumnColor);
+
+  sh.cell(`H2`).value(`${year + " " + sh.name()}`);
+  sh.cell("H2").style("horizontalAlignment", "center");
+  sh.column(`H`).width(20);
+
+  // Total de horas
+  sh.cell(`G1`).value("Total de horas");
+  sh.column(`G`).width(15);
+  sh.cell("G1").style("horizontalAlignment", "center");
+  sh.cell("G1").style("fill", config.colors.totalHorasColumnColor);
+
+  // Total de horas formula
+  sh.cell(`G2`).formula(`SUM(E2:E${lastRow})`);
+  sh.cell("G2").style("horizontalAlignment", "center");
+
+  // Fecha
+  sh.cell("A1").style("fill", mainColumnsColor);
+  sh.column("A").width(15);
+  sh.column("A").style("horizontalAlignment", "center");
+  sh.column("A").style("border", true);
+
+  // Responsable
+  sh.cell("B1").style("fill", mainColumnsColor);
+  sh.column("B").width(15);
+  sh.column("B").style("border", true);
+
+  // Proyecto
+  sh.cell("C1").style("fill", mainColumnsColor);
+  sh.column("C").width(15);
+  sh.column("C").style("border", true);
+
+  // Incidente/Tarea
+  sh.cell("D1").style("fill", mainColumnsColor);
+  sh.column("D").width(40);
+  sh.column("D").style("border", true);
+
+  // Horas
+  sh.cell("E1").style("fill", mainColumnsColor);
+  sh.column("E").width(15);
+  sh.column("E").style("border", true);
+
+  // Descripcion
+  sh.cell("F1").style("fill", mainColumnsColor);
+  sh.column("F").width(15);
+  sh.column("F").style("border", true);
 }
 
 async function main() {
