@@ -1,6 +1,7 @@
 const readline = require("readline");
 const XLSX = require("xlsx");
 const XlsxPopulate = require("xlsx-populate");
+const config = require('./config.json')
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -48,6 +49,7 @@ async function createExcel(
           "",
           "",
           "",
+          "",
         ];
         excelCols.push(rowData);
       }
@@ -57,7 +59,7 @@ async function createExcel(
 
     const date = new Date(year, month - 1);
     const monthNameInSpanish = date
-      .toLocaleString("es-ES", { month: "long" })
+      .toLocaleString(config.date.es, { month: config.date.lengthOfMonthName })
       .toUpperCase();
 
     const sheetName = `${monthNameInSpanish}`;
@@ -72,6 +74,7 @@ async function createExcel(
 
   XlsxPopulate.fromFileAsync(`./${excelFileName}`)
     .then((workbook: any) => {
+      console.log("Populando las columnas del excel con fechas y nombres...")
       workbook.sheets().map((sh: any) => {
         for (let row = 2; ; row++) {
           const cell = sh.cell(`A${row}`);
@@ -79,27 +82,26 @@ async function createExcel(
           let dateValue = cell.value();
           if (!dateValue) break;
 
-          // Esto para que este en formato dia/mes/anio en el excel
           const currentDate = new Date(dateValue);
-          dateValue = cell.value(currentDate.toLocaleDateString("es-ES"));
+          // Esto para que este en formato dia/mes/anio en el excel
+          dateValue = cell.value(currentDate.toLocaleDateString(config.date.es));
 
-          const isWeekend =
-            currentDate.getDay() === 0 || currentDate.getDay() === 6;
+          const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
 
           if (isWeekend) {
             const r = sh.range(`A${row}:F${row}`);
-            r.style("fill", "4a74e8");
+            r.style("fill", config.colors.weekendColor);
           }
         }
         const lastRow = sh.usedRange().endCell().rowNumber();
 
-        const commonHexForCols = "8dde87";
+        const mainColumnsColor = config.colors.mainColumnsColor;
 
         // Total de horas
         sh.cell(`G1`).value("Total de horas:");
         sh.column(`G`).width(15);
         sh.cell("G1").style("horizontalAlignment", "center");
-        sh.cell("G1").style("fill", "d3db74");
+        sh.cell("G1").style("fill", config.colors.totalHorasColumnColor);
 
         // Total de horas formula
         sh.cell(`G2`).formula(`SUM(E2:E${lastRow})`);
@@ -107,38 +109,38 @@ async function createExcel(
 
         // Fecha
         sh.cell("A1").style("bold", true);
-        sh.cell("A1").style("fill", commonHexForCols);
+        sh.cell("A1").style("fill", mainColumnsColor);
         sh.column("A").width(15);
         sh.column("A").style("horizontalAlignment", "center");
         sh.column("A").style("border", true);
 
         // Responsable
         sh.cell("B1").style("bold", true);
-        sh.cell("B1").style("fill", commonHexForCols);
+        sh.cell("B1").style("fill", mainColumnsColor);
         sh.column("B").width(15);
         sh.column("B").style("border", true);
 
         // Proyecto
         sh.cell("C1").style("bold", true);
-        sh.cell("C1").style("fill", commonHexForCols);
+        sh.cell("C1").style("fill", mainColumnsColor);
         sh.column("C").width(15);
         sh.column("C").style("border", true);
 
         // Incidente/Tarea
         sh.cell("D1").style("bold", true);
-        sh.cell("D1").style("fill", commonHexForCols);
+        sh.cell("D1").style("fill", mainColumnsColor);
         sh.column("D").width(100);
         sh.column("D").style("border", true);
 
         // Horas
         sh.cell("E1").style("bold", true);
-        sh.cell("E1").style("fill", commonHexForCols);
+        sh.cell("E1").style("fill", mainColumnsColor);
         sh.column("E").width(15);
         sh.column("E").style("border", true);
 
         // Descripcion
         sh.cell("F1").style("bold", true);
-        sh.cell("F1").style("fill", commonHexForCols);
+        sh.cell("F1").style("fill", mainColumnsColor);
         sh.column("F").width(15);
         sh.column("F").style("border", true);
       });
@@ -146,6 +148,7 @@ async function createExcel(
     })
     .then(() => {
       rl.close();
+      console.log("Bitacora lista 👍")
     })
     .catch((error: any) => {
       console.error("Error:", error);
@@ -175,7 +178,7 @@ async function main() {
     responsables.push(name);
   }
 
-  
+
 
 
   if(responsables.length == 0) {

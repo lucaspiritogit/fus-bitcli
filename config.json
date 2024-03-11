@@ -1,0 +1,12 @@
+{
+  "colors": {
+    "weekendColor": "4a74e8",
+    "mainColumnsColor": "8dde87",
+    "totalHorasColumnColor": "d3db74"
+  },
+  "date": {
+    "es": "es-ES",
+    "en": "en-EN",
+    "lengthOfMonthName": "long"
+  }
+}

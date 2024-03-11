@@ -18,14 +18,13 @@ Herramienta CLI para generar bitacoras diarias para Fusap
 - Tener instalada la ultima version de [node](https://nodejs.org/en) LTS.
 - Clonar el proyecto y ejecutar `npm install` dentro de la carpeta del proyecto.
 
-### Sin compilar
+## Configuracion
 
-*Para no tener que compilar el proyecto, subo la carpeta `/dist` que contiene el programa compilado (**fusbitcli.js)***
+En el proyecto hay un archivo `config.json` que tiene los valores hexadecimales para los colores y otras configuraciones.
+**Para que los colores se apliquen se deben proveer valores hexadecimales sin el '#'**
 
-1. Dentro de la carpeta del proyecto ejecutar: `npm run start` dentro de la carpeta del proyecto.
+## Ejecucion
 
-### Con compilacion
+1. Dentro de la carpeta del proyecto ejecutar: `npm run start:tsx`
 
-Si les interesa hacer pruebas, para compilar el proyecto tienen que:
 
-1. Dentro de la carpeta del proyecto ejecutar `npm run build` dentro de la carpeta del proyecto.
