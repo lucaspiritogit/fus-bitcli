@@ -2,7 +2,7 @@
 
 Herramienta CLI para generar bitacoras diarias para Fusap
 
-![Mockupimage](./assets/mockup.png "mockup")
+![Mockupimage](./assets/new-mock.png "mockup")
 
 # Features
 
@@ -13,7 +13,7 @@ Herramienta CLI para generar bitacoras diarias para Fusap
 
 # Como utilizar
 
-## Pre-requisitos
+## Requisitos
 
 - Tener instalada la ultima version de [node](https://nodejs.org/en) LTS.
 - Clonar el proyecto y ejecutar `npm install` dentro de la carpeta del proyecto.
