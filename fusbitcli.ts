@@ -177,26 +177,26 @@ function applyStylesAndFormulasToRows(sh: any, lastRow: any, mainColumnsColor: a
 
 async function main() {
   let responsablesAmount: number = await ask<number>(
-    "Ingrese numero de responsables (no contar a quien da seguimiento al proyecto): "
+    "Ingrese el número de responsables (sin contar a quien da seguimiento al proyecto): "
   );
 
   while (!responsablesAmount || isNaN(responsablesAmount)) {
     if (isNaN(responsablesAmount)) {
-      console.log("No se acepta texto como parametro");
+      console.log("Por favor, ingrese un número válido.");
     }
     responsablesAmount = await ask<number>(
-      "Ingrese numero de responsables (no contar a quien da seguimiento al proyecto): "
+      "Ingrese el número de responsables (sin contar a quien da seguimiento al proyecto): "
     );
   }
 
   let responsables: Array<string> = [];
   for (let i = 0; i < responsablesAmount; i++) {
-    const name: string = await ask<string>(`Ingrese nombre de responsable numero ${i + 1}: `);
+    const name: string = await ask<string>(`Ingrese el nombre del responsable número ${i + 1}: `);
     responsables.push(name);
   }
 
   const leader: string = await ask<string>(
-    `Ingrese nombre de quien da seguimiento al proyecto (dejar vacio si no lo hay): `
+    `Ingrese el nombre de quien da seguimiento al proyecto (dejar vacío si no aplica): `
   );
 
   const project: string = await ask<string>("Ingrese nombre del proyecto: ");
