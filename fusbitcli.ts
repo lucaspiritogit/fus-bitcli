@@ -1,18 +1,20 @@
 import { Sheet } from "xlsx";
 
-const readline = require("readline");
 const XLSX = require("xlsx");
 const XlsxPopulate = require("xlsx-populate");
-const config = require('./config.json')
+const config = require("./config.json");
+const readline = require("readline");
 
-const STARTING_ROW = 3
+const STARTING_EXCEL_ROW = 3;
+const year = new Date().getFullYear();
+const feriadosArgentinos: Feriado[] = [];
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-function ask<T>(question: string): Promise<T> {
+export default function ask<T>(question: string): Promise<T> {
   return new Promise((resolve) => {
     rl.question(question, (answer: any) => {
       resolve(answer as unknown as T);
@@ -20,23 +22,27 @@ function ask<T>(question: string): Promise<T> {
   });
 }
 
-const year = new Date().getFullYear();
+(async function populateFeriados() {
+  const resp = await fetch("https://api.argentinadatos.com/v1/feriados");
+  await resp
+    .json()
+    .then((resp) => {
+      for (const date of resp) {
+        feriadosArgentinos.push(date);
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+})();
 
-async function createExcel(
-  responsablesCount: number,
-  responsables: Array<string>,
-  project: string
-) {
+async function createExcel(responsablesCount: number, responsables: Array<string>, project: string) {
   const wb = XLSX.utils.book_new();
 
   for (let month = 1; month <= 12; month++) {
     const excelCols = [
-      [
-        "AÑO/MES", "", "", "TOTAL DE HORAS", "", "", "",
-      ],
-      [
-        "Fecha", "Responsable", "Proyecto", "Incidente/Tarea", "Horas", "Descripcion",
-      ],
+      ["AÑO/MES", "", "", "TOTAL DE HORAS", "", "", ""],
+      ["Fecha", "Responsable", "Proyecto", "Incidente/Tarea", "Horas", "Descripcion"],
     ];
     // aoa es array of arrays
     let excelSheet = XLSX.utils.aoa_to_sheet([]);
@@ -48,13 +54,7 @@ async function createExcel(
         // TODO optimizar esto para que ande en una tostadora
         const currentDate = new Date(year, month - 1, j);
 
-        const rowData = [
-          currentDate.toLocaleDateString("en-EN"),
-          responsables[i],
-          "",
-          "",
-          "",
-        ];
+        const rowData = [currentDate.toLocaleDateString("en-EN"), responsables[i], "", "", ""];
         excelCols.push(rowData);
       }
       j = 1; // Reseteamos los dias por cada participante para que, despues del ultimo dia, se itere de nuevo
@@ -78,12 +78,11 @@ async function createExcel(
 
   XlsxPopulate.fromFileAsync(`./${excelFileName}`)
     .then((workbook: any) => {
-      console.log("Populando las columnas del excel con fechas y nombres...")
       workbook.sheets().map((sh: Sheet) => {
-        for (let row = STARTING_ROW; ; row++) {
+        for (let row = STARTING_EXCEL_ROW; ; row++) {
           const cell = sh.cell(`A${row}`);
           sh.row(row).height(15);
-          sh.row(row).style("fontFamily", config.font.defaultFont)
+          sh.row(row).style("fontFamily", config.font.defaultFont);
           let dateValue = cell.value();
           // La condicion para cortar el loop es si ya no hay fecha que completar por integrante.
           if (!dateValue) break;
@@ -98,6 +97,17 @@ async function createExcel(
             const r = sh.range(`A${row}:F${row}`);
             r.style("fill", config.colors.weekendColor);
           }
+
+          if (feriadosArgentinos.length !== 0) {
+            const formattedCurrentDateForFeriadoAPI = currentDate.toISOString().split("T")[0];
+
+            for (const feriado of feriadosArgentinos) {
+              if (formattedCurrentDateForFeriadoAPI === feriado.fecha) {
+                const r = sh.range(`A${row}:F${row}`);
+                r.style("fill", config.colors.feriadosColor);
+              }
+            }
+          }
         }
         const lastRow = sh.usedRange().endCell().rowNumber();
 
@@ -109,7 +119,7 @@ async function createExcel(
     })
     .then(() => {
       rl.close();
-      console.log("Bitacora lista 👍")
+      console.log("Bitacora lista 👍");
     })
     .catch((error: any) => {
       console.error("Error:", error);
@@ -155,39 +165,27 @@ function applyStylesAndFormulasToRows(sh: any, lastRow: any, mainColumnsColor: a
 }
 
 async function main() {
-  let responsablesCount: number = await ask<number>(
-    "Numero de responsables: "
-  );
+  let responsablesCount: number = await ask<number>("Numero de responsables: ");
 
-  while(!responsablesCount || isNaN(responsablesCount)) {
-    if(isNaN(responsablesCount)) {
-      console.log("No se acepta texto como parametro")
+  while (!responsablesCount || isNaN(responsablesCount)) {
+    if (isNaN(responsablesCount)) {
+      console.log("No se acepta texto como parametro");
     }
-    responsablesCount = await ask<number>(
-      "Numero de responsables: "
-    );
+    responsablesCount = await ask<number>("Numero de responsables: ");
   }
 
   let responsables: Array<string> = [];
   for (let i = 0; i < responsablesCount; i++) {
-    const name: string = await ask<string>(
-      `Nombre de responsable numero ${i + 1}: `
-    );
+    const name: string = await ask<string>(`Nombre de responsable numero ${i + 1}: `);
     responsables.push(name);
   }
 
-
-
-
-  if(responsables.length == 0) {
+  if (responsables.length == 0) {
     for (let i = 0; i < responsablesCount; i++) {
-      const name: string = await ask<string>(
-        `Nombre de responsable numero ${i + 1}: `
-      );
+      const name: string = await ask<string>(`Nombre de responsable numero ${i + 1}: `);
       responsables.push(name);
     }
   }
-
 
   const project: string = await ask<string>("Proyecto: ");
 

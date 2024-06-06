@@ -3,7 +3,8 @@
     "mainColumnsColor": "b6d7a8",
     "weekendColor": "8e7cc3",
     "totalHorasColumnColor": "d3db74",
-    "anioMesColumnColor": "d3db74"
+    "anioMesColumnColor": "d3db74",
+    "feriadosColor": "34f0ed"
   },
   "date": {
     "es": "es-ES",
