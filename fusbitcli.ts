@@ -42,31 +42,29 @@ async function createExcel(responsablesCount: number, responsables: Array<string
   // O(n^3)
   // TODO optimizar esto para que ande en una tostadora
   for (let month = 1; month <= 12; month++) {
-    const excelCols = [
-      ["AÑO/MES", "", "", "TOTAL DE HORAS", "", "", ""],
+    const excel = [
+      ["AÑO/MES", "", "", "TOTAL DE HORAS", "", ""],
       ["Fecha", "Responsable", "Proyecto", "Incidente/Tarea", "Horas", "Descripcion"],
     ];
 
     if (leader) {
       STARTING_EXCEL_ROW = 4;
-      excelCols.push(["", leader, "", "", "", ""]);
+      excel.push(["", leader, "", "", "", ""]);
+    }
+
+    for (let i = 0; i < responsablesCount; i++) {
+      const daysInMonth = new Date(year, month, 0).getDate();
+      for (let j = 1; j <= daysInMonth; j++) {
+        const currentDate = new Date(year, month - 1, j);
+
+        const rowData = [currentDate.toLocaleDateString("en-EN"), responsables[i], "", "", "", ""];
+        excel.push(rowData);
+      }
+      excel.push([" ", "", "", "", "", ""]);
     }
 
     // aoa es array of arrays
-    let excelSheet = XLSX.utils.aoa_to_sheet([]);
-
-    let j = 1;
-    for (let i = 0; i < responsablesCount; i++) {
-      const daysInMonth = new Date(year, month, 0).getDate();
-      for (; j <= daysInMonth; j++) {
-        const currentDate = new Date(year, month - 1, j);
-
-        const rowData = [currentDate.toLocaleDateString("en-EN"), responsables[i], "", "", ""];
-        excelCols.push(rowData);
-      }
-      j = 1; // Reseteamos los dias por cada participante para que, despues del ultimo dia, se itere de nuevo
-    }
-    excelSheet = XLSX.utils.aoa_to_sheet(excelCols);
+    let excelSheet = XLSX.utils.aoa_to_sheet(excel);
 
     const date = new Date(year, month - 1);
     const monthNameInSpanish = date
@@ -91,7 +89,9 @@ async function createExcel(responsablesCount: number, responsables: Array<string
           sh.row(row).height(15);
           sh.row(row).style("fontFamily", config.font.defaultFont);
           let dateValue = cell.value();
-          // La condicion para cortar el loop es si ya no hay fecha que completar por integrante.
+
+          if (dateValue === " ") continue;
+
           if (!dateValue) break;
 
           const currentDate = new Date(dateValue);
