@@ -5,7 +5,7 @@ const XlsxPopulate = require("xlsx-populate");
 const config = require("./config.json");
 const readline = require("readline");
 
-const STARTING_EXCEL_ROW = 3;
+let STARTING_EXCEL_ROW = 3;
 const year = new Date().getFullYear();
 const feriadosArgentinos: Feriado[] = [];
 
@@ -36,22 +36,29 @@ export default function ask<T>(question: string): Promise<T> {
     });
 })();
 
-async function createExcel(responsablesCount: number, responsables: Array<string>, project: string) {
+async function createExcel(responsablesCount: number, responsables: Array<string>, project: string, leader: string) {
   const wb = XLSX.utils.book_new();
 
+  // O(n^3)
+  // TODO optimizar esto para que ande en una tostadora
   for (let month = 1; month <= 12; month++) {
     const excelCols = [
       ["AÑO/MES", "", "", "TOTAL DE HORAS", "", "", ""],
       ["Fecha", "Responsable", "Proyecto", "Incidente/Tarea", "Horas", "Descripcion"],
     ];
+
+    if (leader) {
+      STARTING_EXCEL_ROW = 4;
+      excelCols.push(["", leader, "", "", "", ""]);
+    }
+
     // aoa es array of arrays
     let excelSheet = XLSX.utils.aoa_to_sheet([]);
+
     let j = 1;
     for (let i = 0; i < responsablesCount; i++) {
       const daysInMonth = new Date(year, month, 0).getDate();
       for (; j <= daysInMonth; j++) {
-        // O(n^3)
-        // TODO optimizar esto para que ande en una tostadora
         const currentDate = new Date(year, month - 1, j);
 
         const rowData = [currentDate.toLocaleDateString("en-EN"), responsables[i], "", "", ""];
@@ -134,6 +141,10 @@ function applyStylesAndFormulasToRows(sh: any, lastRow: any, mainColumnsColor: a
   sh.row(2).style("bold", true);
   sh.row(1).height(20);
 
+  sh.row(3).style("fontFamily", config.font.defaultFont);
+  sh.row(3).style("fontFamily", config.font.defaultFont);
+  sh.row(3).height(15);
+
   sh.cell("A2").style("fill", mainColumnsColor);
   sh.column("A").style("horizontalAlignment", "center");
   sh.column("A").style("border", true);
@@ -165,31 +176,32 @@ function applyStylesAndFormulasToRows(sh: any, lastRow: any, mainColumnsColor: a
 }
 
 async function main() {
-  let responsablesCount: number = await ask<number>("Numero de responsables: ");
+  let responsablesAmount: number = await ask<number>(
+    "Ingrese numero de responsables (no contar a quien da seguimiento al proyecto): "
+  );
 
-  while (!responsablesCount || isNaN(responsablesCount)) {
-    if (isNaN(responsablesCount)) {
+  while (!responsablesAmount || isNaN(responsablesAmount)) {
+    if (isNaN(responsablesAmount)) {
       console.log("No se acepta texto como parametro");
     }
-    responsablesCount = await ask<number>("Numero de responsables: ");
+    responsablesAmount = await ask<number>(
+      "Ingrese numero de responsables (no contar a quien da seguimiento al proyecto): "
+    );
   }
 
   let responsables: Array<string> = [];
-  for (let i = 0; i < responsablesCount; i++) {
-    const name: string = await ask<string>(`Nombre de responsable numero ${i + 1}: `);
+  for (let i = 0; i < responsablesAmount; i++) {
+    const name: string = await ask<string>(`Ingrese nombre de responsable numero ${i + 1}: `);
     responsables.push(name);
   }
 
-  if (responsables.length == 0) {
-    for (let i = 0; i < responsablesCount; i++) {
-      const name: string = await ask<string>(`Nombre de responsable numero ${i + 1}: `);
-      responsables.push(name);
-    }
-  }
+  const leader: string = await ask<string>(
+    `Ingrese nombre de quien da seguimiento al proyecto (dejar vacio si no lo hay): `
+  );
 
-  const project: string = await ask<string>("Proyecto: ");
+  const project: string = await ask<string>("Ingrese nombre del proyecto: ");
 
-  await createExcel(responsablesCount, responsables, project);
+  await createExcel(responsablesAmount, responsables, project, leader);
 }
 
 main();
